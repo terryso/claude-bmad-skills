@@ -8,10 +8,10 @@ BMAD (Behavior-Model-Artifact-Document) 方法论的 Claude Code Skills 集合�
 
 ```bash
 # 复制单个 skill
-cp -r skills/bmad-story ~/.claude/skills/
+cp -r .claude/skills/bmad-story ~/.claude/skills/
 
 # 或复制所有 skills
-cp -r skills/* ~/.claude/skills/
+cp -r .claude/skills/* ~/.claude/skills/
 ```
 
 ## 可用 Skills
@@ -36,9 +36,10 @@ cp -r skills/* ~/.claude/skills/
 ```
 claude-bmad-skills/
 ├── README.md
-├── skills/
-│   └── bmad-story/
-│       └── SKILL.md
+├── .claude/
+│   └── skills/
+│       └── bmad-story/
+│           └── SKILL.md
 └── LICENSE
 ```
 
