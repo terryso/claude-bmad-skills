@@ -63,6 +63,30 @@ cp -r .claude/skills/* ~/.claude/skills/
 | 合并条件 | 无 | 测试通过才合并 |
 | 安全性 | 中 | 高 |
 
+---
+
+### bmad-epic-worktree
+
+交付整个 Epic，逐个完成其中所有未完成的用户故事。
+
+```bash
+/bmad-epic-worktree 3
+# 或不传参数，自动选择编号最小且有未完成故事的 Epic
+/bmad-epic-worktree
+```
+
+**执行逻辑：**
+1. 收集 Epic 下所有未完成的故事
+2. 按 Story 编号升序排序
+3. 逐个调用 `/bmad-story-worktree` 交付
+4. 前一个故事完成才开始下一个
+5. 任一失败则停止，保留状态
+
+**适用场景：**
+- 批量交付整个 Epic
+- 自动化多故事顺序开发
+- 确保每个故事独立测试通过
+
 ## 目录结构
 
 ```
@@ -72,7 +96,9 @@ claude-bmad-skills/
 │   └── skills/
 │       ├── bmad-story-deliver/
 │       │   └── SKILL.md
-│       └── bmad-story-worktree/
+│       ├── bmad-story-worktree/
+│       │   └── SKILL.md
+│       └── bmad-epic-worktree/
 │           └── SKILL.md
 └── LICENSE
 ```
