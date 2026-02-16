@@ -1,294 +1,294 @@
 ---
-description: 在独立 worktree 中完成 BMAD 用户故事交付，测试通过后才合并
-argument-hint: <故事编号> 例如: 1.1 或 2.3（可选，不传则自动选择编号最小的 backlog 故事）
+description: Complete BMAD user story delivery in isolated worktree, merge only after tests pass
+argument-hint: <story-number> e.g., 1.1 or 2.3 (optional, auto-selects smallest backlog story if omitted)
 ---
 
-# BMAD 故事交付 (Worktree 版)
+# BMAD Story Deliver (Worktree Edition)
 
-在独立 git worktree 中完成用户故事 `{ARGUMENT}` 的完整交付流程，所有测试通过后才合并到主分支。
+Complete the full delivery pipeline for user story `{ARGUMENT}` in an isolated git worktree, merge to main branch only after all tests pass.
 
-## 前置步骤：确定故事编号
+## Pre-step: Determine Story Number
 
-**如果调用时未传入故事编号 `{ARGUMENT}` 为空：**
+**If no story number is provided (`{ARGUMENT}` is empty):**
 
-1. 读取 `_bmad-output/implementation-artifacts/sprint-status.yaml`
-2. 查找所有状态为 `backlog` 的故事（格式：`X-Y-story-name`）
-3. 按 Epic 编号 X 升序，再按 Story 编号 Y 升序排序
-4. 选择编号最小的故事作为 `{ARGUMENT}`
-5. 输出提示信息：
+1. Read `_bmad-output/implementation-artifacts/sprint-status.yaml`
+2. Find all stories with status `backlog` (format: `X-Y-story-name`)
+3. Sort by Epic number X ascending, then by Story number Y ascending
+4. Select the story with the smallest number as `{ARGUMENT}`
+5. Output:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📌 自动选择故事: {ARGUMENT} (状态: backlog)
+📌 Auto-selected story: {ARGUMENT} (status: backlog)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**示例转换：**
-- 状态文件中的 key: `3-4-prediction-result-storage` → 故事编号: `3.4`
-- 状态文件中的 key: `4-2-thread-safe-state-management` → 故事编号: `4.2`
+**Example conversion:**
+- Key in status file: `3-4-prediction-result-storage` → Story number: `3.4`
+- Key in status file: `4-2-thread-safe-state-management` → Story number: `4.2`
 
 ---
 
-## 与 bmad-story-deliver 的区别
+## Difference from bmad-story-deliver
 
-| 特性 | bmad-story-deliver | bmad-story-worktree |
-|------|-------------------|---------------------|
-| 工作方式 | 直接在当前分支开发 | 独立 worktree 隔离开发 |
-| 代码隔离 | 无 | 完全隔离 |
-| 合并条件 | 无强制要求 | 测试通过 + 修复完成 |
-| 安全性 | 中 | 高 |
+| Feature | bmad-story-deliver | bmad-story-worktree |
+|---------|-------------------|---------------------|
+| Working method | Develop on current branch | Develop in isolated worktree |
+| Code isolation | None | Complete isolation |
+| Merge condition | None enforced | Tests pass + fixes complete |
+| Safety level | Medium | High |
 
-## 执行策略
+## Execution Strategy
 
-使用 **Task 工具** 顺序执行每个阶段，确保进度可见：
+Use **Task tool** to execute each phase sequentially with visible progress:
 
-1. 每个阶段启动独立的 `general-purpose` agent
-2. Agent 完成后返回结构化结果
-3. 主会话输出进度条
+1. Launch independent `general-purpose` agent for each phase
+2. Agent returns structured results upon completion
+3. Main session outputs progress bars
 
 ---
 
-## 执行流程
+## Execution Flow
 
-### Step 1/8: 创建 Worktree
+### Step 1/8: Create Worktree
 
-启动 Task agent 使用 `git worktree` 命令创建独立工作树：
+Launch Task agent to create isolated worktree using `git worktree`:
 
 ```
 Task(
   subagent_type: general-purpose,
-  description: "创建 worktree {ARGUMENT}",
-  prompt: "为故事 {ARGUMENT} 使用 git worktree 命令创建独立工作树。步骤：
+  description: "Create worktree {ARGUMENT}",
+  prompt: "Create isolated worktree for story {ARGUMENT} using git worktree. Steps:
 
-1. 获取当前项目名和分支：
+1. Get current project name and branch:
    PROJECT_NAME=$(basename $(pwd))
    CURRENT_BRANCH=$(git branch --show-current)
 
-2. 创建新分支名：feature/story-{ARGUMENT}
+2. Create new branch name: feature/story-{ARGUMENT}
 
-3. 创建 worktree 目录（在项目同级目录）：
+3. Create worktree directory (in sibling directory):
    WORKTREE_PATH=\"../${PROJECT_NAME}-story-{ARGUMENT}\"
 
-4. 执行 git worktree 命令：
+4. Execute git worktree command:
    git worktree add -b feature/story-{ARGUMENT} \"$WORKTREE_PATH\" $CURRENT_BRANCH
 
-   如果分支已存在则使用：
+   If branch already exists, use:
    git worktree add \"$WORKTREE_PATH\" feature/story-{ARGUMENT}
 
-5. 验证 worktree 创建成功：
+5. Verify worktree created:
    git worktree list
 
-6. 返回：worktree 绝对路径、分支名、基础分支"
+6. Return: worktree absolute path, branch name, base branch"
 )
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [1/8] 创建 Worktree
-   🌿 分支: feature/story-{ARGUMENT}
-   📁 路径: ../{项目名}-story-{ARGUMENT}
+✅ [1/8] Create Worktree
+   🌿 Branch: feature/story-{ARGUMENT}
+   📁 Path: ../{project-name}-story-{ARGUMENT}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-### Step 2/8: 创建用户故事
+### Step 2/8: Create User Story
 
-启动 Task agent 执行创建任务（在 worktree 中）：
+Launch Task agent to execute creation (in worktree):
 
 ```
 Task(
   subagent_type: general-purpose,
-  description: "创建用户故事 {ARGUMENT}",
-  prompt: "在 worktree 中执行 /bmad-bmm-create-story {ARGUMENT}，创建或更新用户故事。完成后返回：1) 故事ID 2) 标题 3) 创建/更新的文件列表"
+  description: "Create user story {ARGUMENT}",
+  prompt: "Execute /bmad-bmm-create-story {ARGUMENT} in worktree to create or update user story. Return: 1) Story ID 2) Title 3) List of created/updated files"
 )
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [2/8] 创建用户故事
-   📝 故事: {ARGUMENT}
-   📄 文件: [文件列表]
+✅ [2/8] Create User Story
+   📝 Story: {ARGUMENT}
+   📄 Files: [file list]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-### Step 3/8: 开发实现
+### Step 3/8: Development
 
-启动 Task agent 执行开发（在 worktree 中）：
+Launch Task agent to execute development (in worktree):
 
 ```
 Task(
   subagent_type: general-purpose,
-  description: "开发用户故事 {ARGUMENT}",
-  prompt: "在 worktree 中执行 /bmad-bmm-dev-story {ARGUMENT}，实现用户故事的功能代码。完成后返回：1) 修改的文件列表 2) 主要改动摘要 3) 是否有需要关注的问题"
+  description: "Develop user story {ARGUMENT}",
+  prompt: "Execute /bmad-bmm-dev-story {ARGUMENT} in worktree to implement user story code. Return: 1) List of modified files 2) Summary of changes 3) Any issues to note"
 )
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [3/8] 开发实现
-   📁 修改文件: [数量] 个
-   🔧 改动: [摘要]
+✅ [3/8] Development
+   📁 Modified files: [count]
+   🔧 Changes: [summary]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-### Step 4/8: QA 自动化测试
+### Step 4/8: QA Automated Testing
 
-启动 Task agent 执行测试（在 worktree 中）：
+Launch Task agent to execute testing (in worktree):
 
 ```
 Task(
   subagent_type: general-purpose,
-  description: "QA测试用户故事 {ARGUMENT}",
-  prompt: "在 worktree 中执行 /bmad-bmm-qa-automate {ARGUMENT}，生成并运行自动化测试。完成后返回：1) 测试文件列表 2) 测试通过率 3) 失败用例（如有）"
+  description: "QA test user story {ARGUMENT}",
+  prompt: "Execute /bmad-bmm-qa-automate {ARGUMENT} in worktree to generate and run automated tests. Return: 1) Test file list 2) Test pass rate 3) Failed cases (if any)"
 )
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [4/8] QA 自动化测试
-   🧪 测试: [通过数/总数]
-   ⚡ 状态: [全部通过 / 有失败]
+✅ [4/8] QA Automated Testing
+   🧪 Tests: [passed/total]
+   ⚡ Status: [All passed / Has failures]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-### Step 5/8: 代码审查
+### Step 5/8: Code Review
 
-启动 Task agent 执行审查（在 worktree 中）：
+Launch Task agent to execute review (in worktree):
 
 ```
 Task(
   subagent_type: general-purpose,
-  description: "审查用户故事 {ARGUMENT}",
-  prompt: "在 worktree 中执行 /bmad-bmm-code-review {ARGUMENT}，审查本故事的代码变更。完成后返回：1) 审查结论（通过/需修改）2) 发现的问题（按严重程度分类：HIGH/MEDIUM/LOW）3) 改进建议"
+  description: "Review user story {ARGUMENT}",
+  prompt: "Execute /bmad-bmm-code-review {ARGUMENT} in worktree to review code changes. Return: 1) Review conclusion (pass/needs-fix) 2) Issues found (categorized by severity: HIGH/MEDIUM/LOW) 3) Improvement suggestions"
 )
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [5/8] 代码审查
-   👀 结论: [通过/需修改]
-   🔴 HIGH: [数量] 个
-   🟡 MEDIUM: [数量] 个
-   🔵 LOW: [数量] 个
+✅ [5/8] Code Review
+   👀 Conclusion: [pass/needs-fix]
+   🔴 HIGH: [count]
+   🟡 MEDIUM: [count]
+   🔵 LOW: [count]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-### Step 6/8: 自动修复问题
+### Step 6/8: Auto-fix Issues
 
-**仅在代码审查发现 HIGH 或 MEDIUM 问题时执行此步骤。**
+**Only executed if HIGH or MEDIUM issues are found during code review.**
 
-启动 Task agent 自动修复问题（在 worktree 中）：
+Launch Task agent to auto-fix issues (in worktree):
 
 ```
 Task(
   subagent_type: general-purpose,
-  description: "修复审查问题 {ARGUMENT}",
-  prompt: "根据上一步代码审查的结果，在 worktree 中自动修复所有 HIGH 和 MEDIUM 严重程度的问题。修复原则：
-1. 优先修复 HIGH 级别问题
-2. 然后修复 MEDIUM 级别问题
-3. LOW 级别问题在代码注释中记录，不需要立即修复
-4. 修复后重新运行相关测试确保不引入回归
-5. 完成后返回：已修复的问题列表、修改的文件、测试结果"
+  description: "Fix review issues {ARGUMENT}",
+  prompt: "Based on code review results, auto-fix all HIGH and MEDIUM severity issues in worktree. Fix principles:
+1. Fix HIGH level issues first
+2. Then fix MEDIUM level issues
+3. Document LOW level issues in code comments, no immediate fix needed
+4. Re-run related tests after fix to ensure no regression
+5. Return: list of fixed issues, modified files, test results"
 )
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [6/8] 自动修复
-   🔧 已修复: [HIGH数 + MEDIUM数] 个问题
-   📁 修改文件: [数量] 个
-   🧪 测试: [通过/失败]
+✅ [6/8] Auto-fix
+   🔧 Fixed: [HIGH + MEDIUM count] issues
+   📁 Modified files: [count]
+   🧪 Tests: [pass/fail]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**如果代码审查无 HIGH/MEDIUM 问题，跳过此步骤并输出：**
+**If no HIGH/MEDIUM issues, skip this step:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏭️ [6/8] 自动修复
-   ✨ 无 HIGH/MEDIUM 问题，跳过修复步骤
+⏭️ [6/8] Auto-fix
+   ✨ No HIGH/MEDIUM issues, skipping fix step
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-### Step 7/8: 合并或保留
+### Step 7/8: Merge or Preserve
 
-**关键决策步骤：检查是否满足合并条件**
+**Critical decision step: Check merge conditions**
 
-合并条件：
-1. ✅ QA 测试全部通过
-2. ✅ 无 HIGH/MEDIUM 级别问题（或已修复）
-3. ✅ 修复后测试仍通过
+Merge conditions:
+1. ✅ All QA tests pass
+2. ✅ No HIGH/MEDIUM issues (or all fixed)
+3. ✅ Tests still pass after fixes
 
-**如果满足所有条件，执行合并：**
+**If all conditions are met, execute merge:**
 
 ```
 Task(
   subagent_type: general-purpose,
-  description: "合并故事分支 {ARGUMENT}",
-  prompt: "使用 git worktree 命令执行合并和清理操作：
+  description: "Merge story branch {ARGUMENT}",
+  prompt: "Execute merge and cleanup using git worktree:
 
-1. 在 worktree 中提交所有更改：
+1. Commit all changes in worktree:
    cd {WORKTREE_PATH}
    git add .
-   git commit -m \"feat: 完成故事 {ARGUMENT}\"
+   git commit -m \"feat: complete story {ARGUMENT}\"
 
-2. 切换回主仓库：
+2. Switch back to main repo:
    cd {ORIGINAL_REPO_PATH}
 
-3. 合并 feature 分支：
+3. Merge feature branch:
    git merge feature/story-{ARGUMENT} --no-edit
 
-4. 删除 worktree：
+4. Remove worktree:
    git worktree remove {WORKTREE_PATH}
 
-5. 可选删除 feature 分支（如果不需要保留）：
+5. Optionally delete feature branch (if not needed):
    git branch -d feature/story-{ARGUMENT}
 
-6. 验证清理完成：
+6. Verify cleanup:
    git worktree list
 
-7. 返回：合并状态、提交哈希、worktree 清理状态"
+7. Return: merge status, commit hash, worktree cleanup status"
 )
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [7/8] 合并分支
-   🔀 合并: feature/story-{ARGUMENT} → [当前分支]
-   🗑️ 清理: worktree 已删除
-   📝 提交: [哈希]
+✅ [7/8] Merge Branch
+   🔀 Merge: feature/story-{ARGUMENT} → [current branch]
+   🗑️ Cleanup: worktree removed
+   📝 Commit: [hash]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**如果不满足合并条件，保留 worktree 等待人工处理：**
+**If merge conditions not met, preserve worktree for manual handling:**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ [7/8] 合并分支
-   ❌ 不满足合并条件，保留 worktree
-   📁 路径: {WORKTREE_PATH}
-   🔧 需要人工处理:
-   - [列出未满足的条件]
+⚠️ [7/8] Merge Branch
+   ❌ Merge conditions not met, preserving worktree
+   📁 Path: {WORKTREE_PATH}
+   🔧 Manual handling needed:
+   - [List unmet conditions]
 
-   处理完成后手动执行:
+   After handling, manually execute:
    cd {WORKTREE_PATH}
-   git add . && git commit -m "fix: 修复问题"
+   git add . && git commit -m "fix: resolve issues"
    cd {ORIGINAL_REPO_PATH}
    git merge feature/story-{ARGUMENT}
    git worktree remove {WORKTREE_PATH}
@@ -297,119 +297,117 @@ Task(
 
 ---
 
-### Step 8/8: 更新状态为 Done
+### Step 8/8: Update Status to Done
 
-**合并成功后，必须同时更新两个文件的状态。**
+**After successful merge, must update both files.**
 
-#### 8.1 更新 sprint-status.yaml
+#### 8.1 Update sprint-status.yaml
 
-使用 Edit 工具更新状态文件：
+Use Edit tool to update status file:
 
 ```
-文件路径: _bmad-output/implementation-artifacts/sprint-status.yaml
+File path: _bmad-output/implementation-artifacts/sprint-status.yaml
 
-将故事状态从 ready-for-dev 或 in-progress 改为 done：
+Change story status from ready-for-dev or in-progress to done:
   {epic-num}-{story-num}-{story-name}: done
 ```
 
-#### 8.2 更新故事详细设计文档
+#### 8.2 Update Story Design Document
 
-使用 Edit 工具更新故事文档状态：
+Use Edit tool to update story document status:
 
 ```
-文件路径: _bmad-output/implementation-artifacts/{epic-num}-{story-num}-{story-name}.md
+File path: _bmad-output/implementation-artifacts/{epic-num}-{story-num}-{story-name}.md
 
-需要更新两处：
+Update two places:
 
-1. 顶部状态行：
-   将 "Status: ready-for-dev" 或 "Status: in-progress" 改为 "Status: done"
+1. Top status line:
+   Change "Status: ready-for-dev" or "Status: in-progress" to "Status: done"
 
-2. Tasks 子任务清单（如果有）：
-   将所有 "- [ ]" 改为 "- [x]" 表示任务完成
+2. Tasks checklist (if any):
+   Change all "- [ ]" to "- [x]" to mark tasks complete
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [8/8] 更新状态
+✅ [8/8] Update Status
    📝 sprint-status.yaml: {ARGUMENT} → done
-   📄 故事文档: Status: done, Tasks: ✅
+   📄 Story doc: Status: done, Tasks: ✅
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-## 最终交付报告
+## Final Delivery Report
 
-全部完成后输出：
-
-**成功合并：**
+**Successful merge:**
 ```
 ╔════════════════════════════════════════════════════════╗
-║           🎉 BMAD 故事交付完成！                        ║
+║           🎉 BMAD Story Delivery Complete!             ║
 ╠════════════════════════════════════════════════════════╣
-║  故事编号: {ARGUMENT}                                   ║
+║  Story: {ARGUMENT}                                     ║
 ║                                                        ║
-║  ✅ Step 1 - 创建 Worktree                              ║
-║  ✅ Step 2 - 创建用户故事                               ║
-║  ✅ Step 3 - 开发实现                                   ║
-║  ✅ Step 4 - QA 自动化测试                              ║
-║  ✅ Step 5 - 代码审查                                   ║
-║  ✅ Step 6 - 自动修复问题                               ║
-║  ✅ Step 7 - 合并分支                                   ║
-║  ✅ Step 8 - 更新状态为 Done                            ║
+║  ✅ Step 1 - Create Worktree                           ║
+║  ✅ Step 2 - Create User Story                         ║
+║  ✅ Step 3 - Development                               ║
+║  ✅ Step 4 - QA Automated Testing                      ║
+║  ✅ Step 5 - Code Review                               ║
+║  ✅ Step 6 - Auto-fix Issues                           ║
+║  ✅ Step 7 - Merge Branch                              ║
+║  ✅ Step 8 - Update Status to Done                     ║
 ║                                                        ║
-║  📊 状态: done                                          ║
+║  📊 Status: done                                       ║
 ╚════════════════════════════════════════════════════════╝
 ```
 
-**需要人工介入：**
+**Manual intervention required:**
 ```
 ╔════════════════════════════════════════════════════════╗
-║        ⚠️ BMAD 故事交付 - 需要人工介入                  ║
+║        ⚠️ BMAD Story Delivery - Manual Intervention    ║
 ╠════════════════════════════════════════════════════════╣
-║  故事编号: {ARGUMENT}                                   ║
+║  Story: {ARGUMENT}                                     ║
 ║                                                        ║
-║  ✅ Step 1 - 创建 Worktree                              ║
-║  ✅ Step 2 - 创建用户故事                               ║
-║  ⚠️ Step 3 - 开发实现 [有问题]                          ║
+║  ✅ Step 1 - Create Worktree                           ║
+║  ✅ Step 2 - Create User Story                         ║
+║  ⚠️ Step 3 - Development [has issues]                  ║
 ║  ...                                                    ║
-║  ❌ Step 7 - 合并分支 [未满足条件]                       ║
+║  ❌ Step 7 - Merge Branch [conditions not met]         ║
 ║                                                        ║
-║  📊 状态: 等待人工处理                                   ║
+║  📊 Status: Awaiting manual handling                   ║
 ║  📁 Worktree: {WORKTREE_PATH}                          ║
 ╚════════════════════════════════════════════════════════╝
 ```
 
 ---
 
-## 错误处理
+## Error Handling
 
-如果任何步骤失败：
-1. 停止执行后续步骤
-2. 保留 worktree 不删除
-3. 输出错误信息和当前状态
-4. 提示用户如何手动修复
-5. 提供恢复命令
+If any step fails:
+1. Stop executing subsequent steps
+2. Preserve worktree (don't delete)
+3. Output error information and current state
+4. Prompt user how to manually fix
+5. Provide recovery commands
 
-**恢复命令示例：**
+**Recovery command examples:**
 ```bash
-# 查看所有 worktree
+# List all worktrees
 git worktree list
 
-# 继续在 worktree 中工作
+# Continue working in worktree
 cd {WORKTREE_PATH}
 
-# 手动完成后提交
-git add . && git commit -m "fix: 手动修复问题"
+# Commit after manual completion
+git add . && git commit -m "fix: manual fix"
 
-# 切换回主仓库并合并
+# Switch back to main repo and merge
 cd {ORIGINAL_REPO_PATH}
 git merge feature/story-{ARGUMENT}
 
-# 清理 worktree
+# Cleanup worktree
 git worktree remove {WORKTREE_PATH}
 
-# 可选：删除 feature 分支
+# Optional: delete feature branch
 git branch -d feature/story-{ARGUMENT}
 ```

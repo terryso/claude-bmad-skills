@@ -1,186 +1,186 @@
 ---
-description: 交付整个 Epic，逐个完成其中所有未完成的用户故事
-argument-hint: <Epic编号> 例如: 1 或 2（可选，不传则自动选择编号最小且有未完成故事的 Epic）
+description: Deliver entire Epic by completing all incomplete user stories sequentially
+argument-hint: <epic-number> e.g., 1 or 2 (optional, auto-selects smallest epic with incomplete stories if omitted)
 ---
 
-# BMAD Epic 交付 (Worktree 版)
+# BMAD Epic Deliver (Worktree Edition)
 
-交付整个 Epic `{ARGUMENT}` 中所有未完成的用户故事，每个故事使用独立 worktree 开发，测试通过后才合并。
+Deliver all incomplete user stories in Epic `{ARGUMENT}`, each story developed in isolated worktree and merged only after tests pass.
 
-## 前置步骤：确定 Epic 编号
+## Pre-step: Determine Epic Number
 
-**如果调用时未传入 Epic 编号 `{ARGUMENT}` 为空：**
+**If no epic number is provided (`{ARGUMENT}` is empty):**
 
-1. 读取 `_bmad-output/implementation-artifacts/sprint-status.yaml`
-2. 查找所有状态不为 `done` 的故事（格式：`X-Y-story-name`）
-3. 提取这些故事的 Epic 编号 X
-4. 选择最小的 Epic 编号作为 `{ARGUMENT}`
-5. 输出提示信息：
+1. Read `_bmad-output/implementation-artifacts/sprint-status.yaml`
+2. Find all stories with status not `done` (format: `X-Y-story-name`)
+3. Extract Epic numbers X from these stories
+4. Select the smallest Epic number as `{ARGUMENT}`
+5. Output:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📌 自动选择 Epic: {ARGUMENT} (有未完成的故事)
+📌 Auto-selected Epic: {ARGUMENT} (has incomplete stories)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**示例：**
-- 状态文件中 `3-2-llm-prompt-template: backlog`, `3-3-xxx: in-progress`, `4-1-xxx: done`
-- 未完成的 Epic 有: 3
-- 自动选择 Epic: 3
+**Example:**
+- Status file has `3-2-llm-prompt-template: backlog`, `3-3-xxx: in-progress`, `4-1-xxx: done`
+- Incomplete Epics: 3
+- Auto-select Epic: 3
 
 ---
 
-## 执行策略
+## Execution Strategy
 
-1. 读取 Epic 下所有未完成的故事
-2. 按 Story 编号升序排序
-3. **逐个**执行 `/bmad-story-worktree` 交付每个故事
-4. 前一个故事完成后才开始下一个
-5. 任一故事失败则停止，保留当前状态
+1. Read all incomplete stories under the Epic
+2. Sort by Story number ascending
+3. Execute `/bmad-story-worktree` for **each** story sequentially
+4. Only start next story after previous one completes
+5. If any story fails, stop and preserve current state
 
 ---
 
-## 执行流程
+## Execution Flow
 
-### Step 1: 收集 Epic 故事列表
+### Step 1: Collect Epic Story List
 
-读取 sprint-status.yaml，收集指定 Epic 下所有未完成的故事：
+Read sprint-status.yaml, collect all incomplete stories under specified Epic:
 
 ```
 Task(
   subagent_type: general-purpose,
-  description: "收集 Epic {ARGUMENT} 故事列表",
-  prompt: "读取 _bmad-output/implementation-artifacts/sprint-status.yaml，收集 Epic {ARGUMENT} 的所有故事：
+  description: "Collect Epic {ARGUMENT} story list",
+  prompt: "Read _bmad-output/implementation-artifacts/sprint-status.yaml, collect all stories for Epic {ARGUMENT}:
 
-1. 筛选 key 格式为 '{ARGUMENT}-Y-story-name' 的条目
-2. 只保留状态不为 'done' 的故事
-3. 按 Story 编号 Y 升序排序
-4. 返回故事列表，格式：
-   - 故事编号: '1.1', '1.2', ...
-   - 故事名称
-   - 当前状态
+1. Filter entries with key format '{ARGUMENT}-Y-story-name'
+2. Keep only stories with status not 'done'
+3. Sort by Story number Y ascending
+4. Return story list with format:
+   - Story number: '1.1', '1.2', ...
+   - Story name
+   - Current status
 
-如果没有未完成的故事，返回空列表并提示 'Epic {ARGUMENT} 所有故事已完成'"
+If no incomplete stories, return empty list and note 'Epic {ARGUMENT} all stories completed'"
 )
 ```
 
-**输出进度：**
+**Progress output:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 [1/?] 收集故事列表
+📋 [1/?] Collect Story List
    📁 Epic: {ARGUMENT}
-   📝 未完成故事: [数量] 个
-   🔢 顺序: {story-1}, {story-2}, ...
+   📝 Incomplete stories: [count]
+   🔢 Order: {story-1}, {story-2}, ...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-### Step 2~N: 逐个交付故事
+### Step 2~N: Deliver Stories Sequentially
 
-**对每个未完成的故事，按顺序执行：**
+**For each incomplete story, execute in order:**
 
 ```
-对于故事 {STORY_NUM} (第 i 个，共 N 个):
+For story {STORY_NUM} (i-th of N total):
 
-执行 /bmad-story-worktree {STORY_NUM}
+Execute /bmad-story-worktree {STORY_NUM}
 
-等待完成后继续下一个故事
+Wait for completion before continuing to next story
 ```
 
-**每个故事交付进度：**
+**Each story delivery progress:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔄 故事 [{i}/{N}]: {STORY_NUM}
-   📝 名称: {story-name}
-   ⏳ 执行中...
+🔄 Story [{i}/{N}]: {STORY_NUM}
+   📝 Name: {story-name}
+   ⏳ Executing...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-[... 执行 bmad-story-worktree 的 8 个步骤 ...]
+[... Execute bmad-story-worktree 8 steps ...]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ 故事 [{i}/{N}]: {STORY_NUM} 完成
+✅ Story [{i}/{N}]: {STORY_NUM} Complete
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**如果某个故事失败：**
+**If any story fails:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ 故事 [{i}/{N}]: {STORY_NUM} 失败
-   ⚠️ 停止后续故事交付
-   📁 请手动处理后再继续
+❌ Story [{i}/{N}]: {STORY_NUM} Failed
+   ⚠️ Stopping subsequent story delivery
+   📁 Please handle manually before continuing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-## 最终交付报告
+## Final Delivery Report
 
-**全部完成：**
+**All complete:**
 ```
 ╔════════════════════════════════════════════════════════╗
-║           🎉 BMAD Epic 交付完成！                       ║
+║           🎉 BMAD Epic Delivery Complete!              ║
 ╠════════════════════════════════════════════════════════╣
-║  Epic 编号: {ARGUMENT}                                  ║
+║  Epic: {ARGUMENT}                                      ║
 ║                                                        ║
-║  ✅ 故事 1: {story-1} - done                            ║
-║  ✅ 故事 2: {story-2} - done                            ║
+║  ✅ Story 1: {story-1} - done                          ║
+║  ✅ Story 2: {story-2} - done                          ║
 ║  ...                                                    ║
-║  ✅ 故事 N: {story-N} - done                            ║
+║  ✅ Story N: {story-N} - done                          ║
 ║                                                        ║
-║  📊 总计: {N}/{N} 故事完成                              ║
-║  🎯 Epic 状态: done                                     ║
+║  📊 Total: {N}/{N} stories completed                   ║
+║  🎯 Epic status: done                                  ║
 ╚════════════════════════════════════════════════════════╝
 ```
 
-**部分完成（有失败）：**
+**Partial completion (has failures):**
 ```
 ╔════════════════════════════════════════════════════════╗
-║        ⚠️ BMAD Epic 交付 - 部分完成                     ║
+║        ⚠️ BMAD Epic Delivery - Partial Completion      ║
 ╠════════════════════════════════════════════════════════╣
-║  Epic 编号: {ARGUMENT}                                  ║
+║  Epic: {ARGUMENT}                                      ║
 ║                                                        ║
-║  ✅ 故事 1: {story-1} - done                            ║
-║  ✅ 故事 2: {story-2} - done                            ║
-║  ❌ 故事 3: {story-3} - 失败                            ║
-║  ⏸️ 故事 4: {story-4} - 未开始                          ║
+║  ✅ Story 1: {story-1} - done                          ║
+║  ✅ Story 2: {story-2} - done                          ║
+║  ❌ Story 3: {story-3} - failed                        ║
+║  ⏸️ Story 4: {story-4} - not started                   ║
 ║  ...                                                    ║
 ║                                                        ║
-║  📊 进度: {completed}/{total} 故事完成                  ║
-║  📁 失败故事: {failed-story}                            ║
-║  💡 处理失败故事后重新运行继续交付                       ║
+║  📊 Progress: {completed}/{total} stories completed    ║
+║  📁 Failed story: {failed-story}                       ║
+║  💡 Handle failed story then re-run to continue        ║
 ╚════════════════════════════════════════════════════════╝
 ```
 
 ---
 
-## 错误处理
+## Error Handling
 
-如果任一故事交付失败：
-1. 停止后续故事交付
-2. 保留失败故事的 worktree（如有）
-3. 输出失败信息和已完成的进度
-4. 提示用户手动处理
+If any story delivery fails:
+1. Stop subsequent story delivery
+2. Preserve failed story's worktree (if any)
+3. Output failure information and completed progress
+4. Prompt user to handle manually
 
-**恢复继续交付：**
+**Resume delivery:**
 ```bash
-# 1. 手动修复失败的故事
+# 1. Manually fix failed story
 cd {WORKTREE_PATH}
-# 修复问题...
-git add . && git commit -m "fix: 修复问题"
+# Fix issues...
+git add . && git commit -m "fix: resolve issues"
 cd {ORIGINAL_REPO_PATH}
 git merge feature/story-{STORY_NUM}
 git worktree remove {WORKTREE_PATH}
 
-# 2. 重新运行 epic 交付，会自动跳过已完成的故事
+# 2. Re-run epic delivery, will auto-skip completed stories
 /bmad-epic-worktree {ARGUMENT}
 ```
 
 ---
 
-## 与 bmad-story-worktree 的关系
+## Relationship with bmad-story-worktree
 
-- **bmad-epic-worktree** 是 **bmad-story-worktree** 的批量版本
-- 内部循环调用 `/bmad-story-worktree {story-num}`
-- 每个故事独立 worktree，独立测试，独立合并
-- 保证顺序执行，前一个完成才开始下一个
-- 每个故事完成后自动更新：sprint-status.yaml + 故事详细设计文档
+- **bmad-epic-worktree** is the batch version of **bmad-story-worktree**
+- Internally loops to call `/bmad-story-worktree {story-num}`
+- Each story has independent worktree, independent tests, independent merge
+- Guarantees sequential execution, next starts only after previous completes
+- Each story completion auto-updates: sprint-status.yaml + story design document
