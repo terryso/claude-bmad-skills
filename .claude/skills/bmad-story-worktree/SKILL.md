@@ -30,17 +30,33 @@ argument-hint: <故事编号> 例如: 1.1 或 2.3
 
 ### Step 1/7: 创建 Worktree
 
-启动 Task agent 创建独立工作树：
+启动 Task agent 使用 `git worktree` 命令创建独立工作树：
 
 ```
 Task(
   subagent_type: general-purpose,
   description: "创建 worktree {ARGUMENT}",
-  prompt: "为故事 {ARGUMENT} 创建独立的 git worktree。步骤：
-1. 从当前分支创建新分支 feature/story-{ARGUMENT}（如果已存在则使用现有分支）
-2. 创建 worktree 目录 ../{项目名}-story-{ARGUMENT}
-3. 切换到新 worktree
-4. 返回：worktree 路径、分支名、创建状态"
+  prompt: "为故事 {ARGUMENT} 使用 git worktree 命令创建独立工作树。步骤：
+
+1. 获取当前项目名和分支：
+   PROJECT_NAME=$(basename $(pwd))
+   CURRENT_BRANCH=$(git branch --show-current)
+
+2. 创建新分支名：feature/story-{ARGUMENT}
+
+3. 创建 worktree 目录（在项目同级目录）：
+   WORKTREE_PATH=\"../${PROJECT_NAME}-story-{ARGUMENT}\"
+
+4. 执行 git worktree 命令：
+   git worktree add -b feature/story-{ARGUMENT} \"$WORKTREE_PATH\" $CURRENT_BRANCH
+
+   如果分支已存在则使用：
+   git worktree add \"$WORKTREE_PATH\" feature/story-{ARGUMENT}
+
+5. 验证 worktree 创建成功：
+   git worktree list
+
+6. 返回：worktree 绝对路径、分支名、基础分支"
 )
 ```
 
@@ -203,13 +219,29 @@ Task(
 Task(
   subagent_type: general-purpose,
   description: "合并故事分支 {ARGUMENT}",
-  prompt: "执行合并操作：
-1. 在 worktree 中提交所有更改
-2. 切换回主仓库
-3. 合并 feature/story-{ARGUMENT} 分支到当前分支
-4. 删除 worktree
-5. 可选：删除 feature 分支
-6. 返回：合并状态、提交哈希"
+  prompt: "使用 git worktree 命令执行合并和清理操作：
+
+1. 在 worktree 中提交所有更改：
+   cd {WORKTREE_PATH}
+   git add .
+   git commit -m \"feat: 完成故事 {ARGUMENT}\"
+
+2. 切换回主仓库：
+   cd {ORIGINAL_REPO_PATH}
+
+3. 合并 feature 分支：
+   git merge feature/story-{ARGUMENT} --no-edit
+
+4. 删除 worktree：
+   git worktree remove {WORKTREE_PATH}
+
+5. 可选删除 feature 分支（如果不需要保留）：
+   git branch -d feature/story-{ARGUMENT}
+
+6. 验证清理完成：
+   git worktree list
+
+7. 返回：合并状态、提交哈希、worktree 清理状态"
 )
 ```
 
@@ -226,18 +258,24 @@ Task(
 **如果不满足合并条件，保留 worktree 等待人工处理：**
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━���━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ [7/7] 合并分支
    ❌ 不满足合并条件，保留 worktree
-   📁 路径: ../{项目名}-story-{ARGUMENT}
+   📁 路径: {WORKTREE_PATH}
    🔧 需要人工处理:
    - [列出未满足的条件]
 
    处理完成后手动执行:
+   cd {WORKTREE_PATH}
+   git add . && git commit -m "fix: 修复问题"
+   cd {ORIGINAL_REPO_PATH}
    git merge feature/story-{ARGUMENT}
-   git worktree remove ../{项目名}-story-{ARGUMENT}
+   git worktree remove {WORKTREE_PATH}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+---
+
 
 ---
 
@@ -295,14 +333,22 @@ Task(
 
 **恢复命令示例：**
 ```bash
-# 继续在 worktree 中工作
-cd ../{项目名}-story-{ARGUMENT}
+# 查看所有 worktree
+git worktree list
 
-# 手动完成后合并
+# 继续在 worktree 中工作
+cd {WORKTREE_PATH}
+
+# 手动完成后提交
 git add . && git commit -m "fix: 手动修复问题"
-cd {原项目目录}
+
+# 切换回主仓库并合并
+cd {ORIGINAL_REPO_PATH}
 git merge feature/story-{ARGUMENT}
 
 # 清理 worktree
-git worktree remove ../{项目名}-story-{ARGUMENT}
+git worktree remove {WORKTREE_PATH}
+
+# 可选：删除 feature 分支
+git branch -d feature/story-{ARGUMENT}
 ```
