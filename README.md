@@ -18,10 +18,12 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 ### bmad-story-deliver
 
-完成 BMAD 用户故事的完整交付流程（创建 → 开发 → QA → 审查 → 自动修复）。
+完成 BMAD 用户故事的完整交付流程（创建 → 开发 → QA → 审查 → 自动修复 → 更新状态）。
 
 ```bash
 /bmad-story-deliver 1.1
+# 或不传参数，自动选择编号最小的 backlog 故事
+/bmad-story-deliver
 ```
 
 **流程步骤：**
@@ -30,6 +32,7 @@ cp -r .claude/skills/* ~/.claude/skills/
 3. QA 自动化测试
 4. 代码审查
 5. 自动修复问题（HIGH/MEDIUM 级别）
+6. 更新状态为 Done
 
 ---
 
@@ -39,6 +42,8 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 ```bash
 /bmad-story-worktree 1.1
+# 或不传参数，自动选择编号最小的 backlog 故事
+/bmad-story-worktree
 ```
 
 **流程步骤：**
@@ -49,6 +54,7 @@ cp -r .claude/skills/* ~/.claude/skills/
 5. 代码审查
 6. 自动修复问题（HIGH/MEDIUM 级别）
 7. 合并分支（仅当测试通过 + 无遗留问题）
+8. 更新状态为 Done
 
 **与 deliver 版的区别：**
 | 特性 | deliver | worktree |
