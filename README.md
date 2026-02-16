@@ -8,7 +8,7 @@ BMAD (Behavior-Model-Artifact-Document) 方法论的 Claude Code Skills 集合�
 
 ```bash
 # 复制单个 skill
-cp -r .claude/skills/bmad-story ~/.claude/skills/
+cp -r .claude/skills/bmad-story-deliver ~/.claude/skills/
 
 # 或复制所有 skills
 cp -r .claude/skills/* ~/.claude/skills/
@@ -16,12 +16,12 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 ## 可用 Skills
 
-### bmad-story
+### bmad-story-deliver
 
 完成 BMAD 用户故事的完整交付流程（创建 → 开发 → QA → 审查 → 自动修复）。
 
 ```bash
-/bmad-story 1.1
+/bmad-story-deliver 1.1
 ```
 
 **流程步骤：**
@@ -38,7 +38,7 @@ claude-bmad-skills/
 ├── README.md
 ├── .claude/
 │   └── skills/
-│       └── bmad-story/
+│       └── bmad-story-deliver/
 │           └── SKILL.md
 └── LICENSE
 ```

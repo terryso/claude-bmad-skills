@@ -1,9 +1,9 @@
 ---
-description: 完成 BMAD 用户故事的完整交付流程（创建 → 开发 → QA → 审查）
+description: 完成 BMAD 用户故事的完整交付流程（创建 → 开发 → QA → 审查 → 自动修复）
 argument-hint: <故事编号> 例如: 1.1 或 2.3
 ---
 
-# BMAD 故事交付
+# BMAD 故事交付 (Story Deliver)
 
 完成用户故事 `{ARGUMENT}` 的完整交付流程。
 
