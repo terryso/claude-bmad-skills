@@ -31,6 +31,32 @@ cp -r .claude/skills/* ~/.claude/skills/
 4. 代码审查
 5. 自动修复问题（HIGH/MEDIUM 级别）
 
+---
+
+### bmad-story-worktree
+
+在独立 git worktree 中完成用户故事交付，所有测试通过后才合并到主分支。
+
+```bash
+/bmad-story-worktree 1.1
+```
+
+**流程步骤：**
+1. 创建 Worktree（隔离开发环境）
+2. 创建用户故事
+3. 开发实现
+4. QA 自动化测试
+5. 代码审查
+6. 自动修复问题（HIGH/MEDIUM 级别）
+7. 合并分支（仅当测试通过 + 无遗留问题）
+
+**与 deliver 版的区别：**
+| 特性 | deliver | worktree |
+|------|---------|----------|
+| 代码隔离 | 无 | 完全隔离 |
+| 合并条件 | 无 | 测试通过才合并 |
+| 安全性 | 中 | 高 |
+
 ## 目录结构
 
 ```
@@ -38,7 +64,9 @@ claude-bmad-skills/
 ├── README.md
 ├── .claude/
 │   └── skills/
-│       └── bmad-story-deliver/
+│       ├── bmad-story-deliver/
+│       │   └── SKILL.md
+│       └── bmad-story-worktree/
 │           └── SKILL.md
 └── LICENSE
 ```
