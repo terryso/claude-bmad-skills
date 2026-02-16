@@ -2,6 +2,8 @@
 
 Claude Code Skills collection for BMAD (Behavior-Model-Artifact-Document) methodology.
 
+[中文文档](README_CN.md)
+
 ## Installation
 
 Copy the desired skills to your Claude Code skills directory:
