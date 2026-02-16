@@ -183,3 +183,4 @@ git worktree remove {WORKTREE_PATH}
 - 内部循环调用 `/bmad-story-worktree {story-num}`
 - 每个故事独立 worktree，独立测试，独立合并
 - 保证顺序执行，前一个完成才开始下一个
+- 每个故事完成后自动更新：sprint-status.yaml + 故事详细设计文档
