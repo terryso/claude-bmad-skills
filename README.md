@@ -1,6 +1,6 @@
 # Claude BMAD Skills
 
-Claude Code Skills collection for BMAD (Behavior-Model-Artifact-Document) methodology.
+Claude Code Skills collection for BMAD (Breakthrough Method of Agile AI Driven Development) methodology.
 
 [中文文档](README_CN.md)
 

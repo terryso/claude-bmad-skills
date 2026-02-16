@@ -1,6 +1,6 @@
 # Claude BMAD Skills
 
-BMAD (Behavior-Model-Artifact-Document) 方法论的 Claude Code Skills 集合。
+BMAD (Breakthrough Method of Agile AI Driven Development) 方法论的 Claude Code Skills 集合。
 
 [English](README.md)
 
