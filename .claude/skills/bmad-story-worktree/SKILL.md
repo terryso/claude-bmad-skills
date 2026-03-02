@@ -59,7 +59,8 @@ Task(
   description: "Create worktree {ARGUMENT}",
   prompt: "Create isolated worktree for story {ARGUMENT} using git worktree. Steps:
 
-1. Get current project name and branch:
+1. Get current project name, path and branch:
+   ORIGINAL_REPO_PATH=$(pwd)
    PROJECT_NAME=$(basename $(pwd))
    CURRENT_BRANCH=$(git branch --show-current)
 
@@ -77,7 +78,7 @@ Task(
 5. Verify worktree created:
    git worktree list
 
-6. Return: worktree absolute path, branch name, base branch"
+6. Return: worktree absolute path, branch name, base branch, original repo path"
 )
 ```
 
