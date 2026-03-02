@@ -22,14 +22,15 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 | Skill | Execution Mode | Pipeline | Isolation |
 |-------|---------------|----------|-----------|
-| bmad-story-deliver | Direct | Fixed 6-step | None |
-| bmad-story-worktree | Direct | Fixed 8-step | Worktree |
+| bmad-story-deliver | Subagent | Fixed 6-step | None |
+| bmad-story-worktree | Subagent | Fixed 8-step | Worktree |
 | bmad-story-pipeline | Subagent | Configurable | None |
 | bmad-story-pipeline-worktree | Subagent | Configurable | Worktree |
 | bmad-story-team-deliver | Agent Team | Fixed 5-step | Context |
-| bmad-story-team-worktree | Agent Team | Fixed 5-step | Worktree |
 | bmad-epic-worktree | Batch | Fixed | Worktree |
 | bmad-epic-pipeline-worktree | Batch | Configurable | Worktree |
+
+> 💡 **Recommended**: Use `bmad-story-pipeline` or `bmad-story-pipeline-worktree` for configurable workflow.
 
 ---
 
@@ -148,23 +149,6 @@ Run BMAD pipeline using agent teams with isolated context per step.
 
 ---
 
-### bmad-story-team-worktree
-
-Complete BMAD user story delivery using agent teams in isolated worktree, merge only after tests pass.
-
-```bash
-/bmad-story-team-worktree 1-1
-# Or omit argument to auto-select
-/bmad-story-team-worktree
-```
-
-**Features:**
-- All features of `bmad-story-team-deliver`
-- Plus worktree isolation
-- Conditional merge
-
----
-
 ### bmad-epic-worktree
 
 Deliver entire Epic by completing all incomplete user stories sequentially.
@@ -226,8 +210,6 @@ claude-bmad-skills/
 │       │   └── references/workflow-steps.md
 │       ├── bmad-story-team-deliver/
 │       │   └── SKILL.md
-│       ├── bmad-story-team-worktree/
-│       │   └── SKILL.md
 │       ├── bmad-epic-worktree/
 │       │   └── SKILL.md
 │       └── bmad-epic-pipeline-worktree/
@@ -238,14 +220,13 @@ claude-bmad-skills/
 ## Choosing the Right Skill
 
 **For single story:**
-- Need isolation? → `bmad-story-worktree` or `bmad-story-pipeline-worktree`
-- Want configurable pipeline? → `bmad-story-pipeline` or `bmad-story-pipeline-worktree`
-- Want agent teams? → `bmad-story-team-deliver` or `bmad-story-team-worktree`
-- Simple & fast? → `bmad-story-deliver`
+- 🌟 **Recommended**: `bmad-story-pipeline` or `bmad-story-pipeline-worktree` (configurable workflow)
+- Need worktree isolation? → `bmad-story-pipeline-worktree`
+- Simple & fast? → `bmad-story-deliver` or `bmad-story-worktree`
 
 **For entire Epic:**
+- 🌟 **Recommended**: `bmad-epic-pipeline-worktree` (configurable workflow)
 - Fixed pipeline? → `bmad-epic-worktree`
-- Configurable pipeline? → `bmad-epic-pipeline-worktree`
 
 ## Contributing
 

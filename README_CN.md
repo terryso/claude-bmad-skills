@@ -22,14 +22,15 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 | 技能 | 执行模式 | 管道 | 隔离 |
 |------|---------|------|------|
-| bmad-story-deliver | 直接执行 | 固定 6 步 | 无 |
-| bmad-story-worktree | 直接执行 | 固定 8 步 | Worktree |
+| bmad-story-deliver | 子代理 | 固定 6 步 | 无 |
+| bmad-story-worktree | 子代理 | 固定 8 步 | Worktree |
 | bmad-story-pipeline | 子代理 | 可配置 | 无 |
 | bmad-story-pipeline-worktree | 子代理 | 可配置 | Worktree |
 | bmad-story-team-deliver | 代理团队 | 固定 5 步 | 上下文 |
-| bmad-story-team-worktree | 代理团队 | 固定 5 步 | Worktree |
 | bmad-epic-worktree | 批量 | 固定 | Worktree |
 | bmad-epic-pipeline-worktree | 批量 | 可配置 | Worktree |
+
+> 💡 **推荐**：使用 `bmad-story-pipeline` 或 `bmad-story-pipeline-worktree`，支持可配置工作流。
 
 ---
 
@@ -148,23 +149,6 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 ---
 
-### bmad-story-team-worktree
-
-使用代理团队在独立 worktree 中完成 BMAD 用户故事交付，测试通过后才合并。
-
-```bash
-/bmad-story-team-worktree 1-1
-# 或不传参数，自动选择
-/bmad-story-team-worktree
-```
-
-**特性：**
-- 包含 `bmad-story-team-deliver` 的所有特性
-- 额外的 worktree 隔离
-- 条件合并
-
----
-
 ### bmad-epic-worktree
 
 交付整个 Epic，逐个完成其中所有未完成的用户故事。
@@ -227,8 +211,6 @@ claude-bmad-skills/
 │       │   └── references/workflow-steps.md
 │       ├── bmad-story-team-deliver/
 │       │   └── SKILL.md
-│       ├── bmad-story-team-worktree/
-│       │   └── SKILL.md
 │       ├── bmad-epic-worktree/
 │       │   └── SKILL.md
 │       └── bmad-epic-pipeline-worktree/
@@ -238,14 +220,13 @@ claude-bmad-skills/
 ## 如何选择合适的 Skill
 
 **单个故事交付：**
-- 需要隔离？ → `bmad-story-worktree` 或 `bmad-story-pipeline-worktree`
-- 想要可配置管道？ → `bmad-story-pipeline` 或 `bmad-story-pipeline-worktree`
-- 想要代理团队？ → `bmad-story-team-deliver` 或 `bmad-story-team-worktree`
-- 简单快速？ → `bmad-story-deliver`
+- 🌟 **推荐**：`bmad-story-pipeline` 或 `bmad-story-pipeline-worktree`（可配置工作流）
+- 需要 worktree 隔离？ → `bmad-story-pipeline-worktree`
+- 简单快速？ → `bmad-story-deliver` 或 `bmad-story-worktree`
 
 **整个 Epic 交付：**
+- 🌟 **推荐**：`bmad-epic-pipeline-worktree`（可配置工作流）
 - 固定管道？ → `bmad-epic-worktree`
-- 可配置管道？ → `bmad-epic-pipeline-worktree`
 
 ## 贡献
 
