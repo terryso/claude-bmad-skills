@@ -22,64 +22,15 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 | 技能 | 执行模式 | 管道 | 隔离 |
 |------|---------|------|------|
-| bmad-story-deliver | 子代理 | 固定 6 步 | 无 |
-| bmad-story-worktree | 子代理 | 固定 8 步 | Worktree |
 | bmad-story-pipeline | 子代理 | 可配置 | 无 |
 | bmad-story-pipeline-worktree | 子代理 | 可配置 | Worktree |
+| bmad-story-deliver | 子代理 | 固定 6 步 | 无 |
+| bmad-story-worktree | 子代理 | 固定 8 步 | Worktree |
 | bmad-story-team-deliver | 代理团队 | 固定 5 步 | 上下文 |
-| bmad-epic-worktree | 批量 | 固定 | Worktree |
 | bmad-epic-pipeline-worktree | 批量 | 可配置 | Worktree |
+| bmad-epic-worktree | 批量 | 固定 | Worktree |
 
 > 💡 **推荐**：使用 `bmad-story-pipeline` 或 `bmad-story-pipeline-worktree`，支持可配置工作流。
-
----
-
-### bmad-story-deliver
-
-完成 BMAD 用户故事的完整交付流程（创建 → 开发 → QA → 审查 → 自动修复 → 更新状态）。
-
-```bash
-/bmad-story-deliver 1.1
-# 或不传参数，自动选择编号最小的 backlog 故事
-/bmad-story-deliver
-```
-
-**流程步骤：**
-1. 创建用户故事
-2. 开发实现
-3. QA 自动化测试
-4. 代码审查
-5. 自动修复 HIGH/MEDIUM 问题
-6. 更新状态为 Done
-
----
-
-### bmad-story-worktree
-
-在独立 git worktree 中完成用户故事交付，所有测试通过后才合并到主分支。
-
-```bash
-/bmad-story-worktree 1.1
-# 或不传参数，自动选择编号最小的 backlog 故事
-/bmad-story-worktree
-```
-
-**流程步骤：**
-1. 创建 Worktree（隔离开发环境）
-2. 创建用户故事
-3. 开发实现
-4. QA 自动化测试
-5. 代码审查
-6. 自动修复 HIGH/MEDIUM 问题
-7. 合并分支（仅当测试通过 + 无遗留问题）
-8. 更新状态为 Done
-
-**与 deliver 版的区别：**
-| 特性 | deliver | worktree |
-|------|---------|----------|
-| 代码隔离 | 无 | 完全隔离 |
-| 合并条件 | 无强制要求 | 测试通过才合并 |
-| 安全性 | 中 | 高 |
 
 ---
 
@@ -132,6 +83,55 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 ---
 
+### bmad-story-deliver
+
+完成 BMAD 用户故事的完整交付流程（创建 → 开发 → QA → 审查 → 自动修复 → 更新状态）。
+
+```bash
+/bmad-story-deliver 1.1
+# 或不传参数，自动选择编号最小的 backlog 故事
+/bmad-story-deliver
+```
+
+**流程步骤：**
+1. 创建用户故事
+2. 开发实现
+3. QA 自动化测试
+4. 代码审查
+5. 自动修复 HIGH/MEDIUM 问题
+6. 更新状态为 Done
+
+---
+
+### bmad-story-worktree
+
+在独立 git worktree 中完成用户故事交付，所有测试通过后才合并到主分支。
+
+```bash
+/bmad-story-worktree 1.1
+# 或不传参数，自动选择编号最小的 backlog 故事
+/bmad-story-worktree
+```
+
+**流程步骤：**
+1. 创建 Worktree（隔离开发环境）
+2. 创建用户故事
+3. 开发实现
+4. QA 自动化测试
+5. 代码审查
+6. 自动修复 HIGH/MEDIUM 问题
+7. 合并分支（仅当测试通过 + 无遗留问题）
+8. 更新状态为 Done
+
+**与 deliver 版的区别：**
+| 特性 | deliver | worktree |
+|------|---------|----------|
+| 代码隔离 | 无 | 完全隔离 |
+| 合并条件 | 无强制要求 | 测试通过才合并 |
+| 安全性 | 中 | 高 |
+
+---
+
 ### bmad-story-team-deliver
 
 使用代理团队运行 BMAD 管道，每个步骤使用独立上下文。
@@ -146,6 +146,23 @@ cp -r .claude/skills/* ~/.claude/skills/
 - 每个管道步骤在专属队友中运行
 - 每步全新上下文（无上下文污染）
 - 复杂工作流的团队协作
+
+---
+
+### bmad-epic-pipeline-worktree
+
+使用可配置管道在独立 worktree 中交付整个 Epic。
+
+```bash
+/bmad-epic-pipeline-worktree 3
+# 或不传参数，自动选择
+/bmad-epic-pipeline-worktree
+```
+
+**特性：**
+- 与 `bmad-epic-worktree` 相同，但使用 `bmad-story-pipeline-worktree`
+- 通过 workflow-steps.md 配置管道
+- 每个故事独立 worktree 隔离
 
 ---
 
@@ -170,23 +187,6 @@ cp -r .claude/skills/* ~/.claude/skills/
 - 批量交付整个 Epic
 - 自动化多故事顺序开发
 - 确保每个故事独立测试通过
-
----
-
-### bmad-epic-pipeline-worktree
-
-使用可配置管道在独立 worktree 中交付整个 Epic。
-
-```bash
-/bmad-epic-pipeline-worktree 3
-# 或不传参数，自动选择
-/bmad-epic-pipeline-worktree
-```
-
-**特性：**
-- 与 `bmad-epic-worktree` 相同，但使用 `bmad-story-pipeline-worktree`
-- 通过 workflow-steps.md 配置管道
-- 每个故事独立 worktree 隔离
 
 ---
 

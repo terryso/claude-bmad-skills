@@ -22,64 +22,15 @@ cp -r .claude/skills/* ~/.claude/skills/
 
 | Skill | Execution Mode | Pipeline | Isolation |
 |-------|---------------|----------|-----------|
-| bmad-story-deliver | Subagent | Fixed 6-step | None |
-| bmad-story-worktree | Subagent | Fixed 8-step | Worktree |
 | bmad-story-pipeline | Subagent | Configurable | None |
 | bmad-story-pipeline-worktree | Subagent | Configurable | Worktree |
+| bmad-story-deliver | Subagent | Fixed 6-step | None |
+| bmad-story-worktree | Subagent | Fixed 8-step | Worktree |
 | bmad-story-team-deliver | Agent Team | Fixed 5-step | Context |
-| bmad-epic-worktree | Batch | Fixed | Worktree |
 | bmad-epic-pipeline-worktree | Batch | Configurable | Worktree |
+| bmad-epic-worktree | Batch | Fixed | Worktree |
 
 > 💡 **Recommended**: Use `bmad-story-pipeline` or `bmad-story-pipeline-worktree` for configurable workflow.
-
----
-
-### bmad-story-deliver
-
-Complete BMAD user story delivery pipeline (Create → Develop → QA → Review → Auto-fix → Update status).
-
-```bash
-/bmad-story-deliver 1.1
-# Or omit argument to auto-select smallest backlog story
-/bmad-story-deliver
-```
-
-**Pipeline steps:**
-1. Create user story
-2. Development
-3. QA automated testing
-4. Code review
-5. Auto-fix HIGH/MEDIUM issues
-6. Update status to Done
-
----
-
-### bmad-story-worktree
-
-Complete user story delivery in isolated git worktree, merge only after all tests pass.
-
-```bash
-/bmad-story-worktree 1.1
-# Or omit argument to auto-select smallest backlog story
-/bmad-story-worktree
-```
-
-**Pipeline steps:**
-1. Create Worktree (isolated dev environment)
-2. Create user story
-3. Development
-4. QA automated testing
-5. Code review
-6. Auto-fix HIGH/MEDIUM issues
-7. Merge branch (only when tests pass + no outstanding issues)
-8. Update status to Done
-
-**Difference from deliver version:**
-| Feature | deliver | worktree |
-|---------|---------|----------|
-| Code isolation | None | Complete isolation |
-| Merge condition | None enforced | Tests pass + fixes complete |
-| Safety level | Medium | High |
 
 ---
 
@@ -132,6 +83,55 @@ Run configurable BMAD pipeline in isolated worktree, merge only after tests pass
 
 ---
 
+### bmad-story-deliver
+
+Complete BMAD user story delivery pipeline (Create → Develop → QA → Review → Auto-fix → Update status).
+
+```bash
+/bmad-story-deliver 1.1
+# Or omit argument to auto-select smallest backlog story
+/bmad-story-deliver
+```
+
+**Pipeline steps:**
+1. Create user story
+2. Development
+3. QA automated testing
+4. Code review
+5. Auto-fix HIGH/MEDIUM issues
+6. Update status to Done
+
+---
+
+### bmad-story-worktree
+
+Complete user story delivery in isolated git worktree, merge only after all tests pass.
+
+```bash
+/bmad-story-worktree 1.1
+# Or omit argument to auto-select smallest backlog story
+/bmad-story-worktree
+```
+
+**Pipeline steps:**
+1. Create Worktree (isolated dev environment)
+2. Create user story
+3. Development
+4. QA automated testing
+5. Code review
+6. Auto-fix HIGH/MEDIUM issues
+7. Merge branch (only when tests pass + no outstanding issues)
+8. Update status to Done
+
+**Difference from deliver version:**
+| Feature | deliver | worktree |
+|---------|---------|----------|
+| Code isolation | None | Complete isolation |
+| Merge condition | None enforced | Tests pass + fixes complete |
+| Safety level | Medium | High |
+
+---
+
 ### bmad-story-team-deliver
 
 Run BMAD pipeline using agent teams with isolated context per step.
@@ -146,6 +146,23 @@ Run BMAD pipeline using agent teams with isolated context per step.
 - Each pipeline step runs in dedicated teammate
 - Fresh context per step (no context pollution)
 - Team coordination for complex workflows
+
+---
+
+### bmad-epic-pipeline-worktree
+
+Deliver entire Epic using configurable pipeline in isolated worktrees.
+
+```bash
+/bmad-epic-pipeline-worktree 3
+# Or omit argument to auto-select
+/bmad-epic-pipeline-worktree
+```
+
+**Features:**
+- Same as `bmad-epic-worktree` but uses `bmad-story-pipeline-worktree`
+- Configurable pipeline via workflow-steps.md
+- Worktree isolation per story
 
 ---
 
@@ -170,23 +187,6 @@ Deliver entire Epic by completing all incomplete user stories sequentially.
 - Batch deliver entire Epic
 - Automate multi-story sequential development
 - Ensure each story passes tests independently
-
----
-
-### bmad-epic-pipeline-worktree
-
-Deliver entire Epic using configurable pipeline in isolated worktrees.
-
-```bash
-/bmad-epic-pipeline-worktree 3
-# Or omit argument to auto-select
-/bmad-epic-pipeline-worktree
-```
-
-**Features:**
-- Same as `bmad-epic-worktree` but uses `bmad-story-pipeline-worktree`
-- Configurable pipeline via workflow-steps.md
-- Worktree isolation per story
 
 ---
 
