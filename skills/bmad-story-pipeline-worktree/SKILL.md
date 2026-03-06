@@ -12,7 +12,7 @@ Complete the delivery pipeline for story `{ARGUMENT}` using configurable workflo
 
 If `{ARGUMENT}` is empty or not provided:
 
-1. Read `docs/sprint/sprint-status.yaml` to find stories
+1. Read `_bmad-output/implementation-artifacts/sprint-status.yaml` (or `docs/sprint/sprint-status.yaml`) to find stories
 2. Find the first story with status "todo" or "in-progress"
 3. Use that story number as `{STORY_ID}`
 4. If no story found, ask user to specify story number
@@ -236,7 +236,7 @@ Merge conditions:
 Use Edit tool to update status file:
 
 ```
-File path: docs/sprint/sprint-status.yaml
+File path: _bmad-output/implementation-artifacts/sprint-status.yaml (or docs/sprint/sprint-status.yaml)
 
 Change story status from in-progress to done:
   {epic-num}-{story-num}-{story-name}: done
