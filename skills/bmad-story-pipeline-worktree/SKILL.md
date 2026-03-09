@@ -163,7 +163,32 @@ After each step, output progress:
 
 ---
 
-## Phase 3: Merge or Preserve
+## Phase 3: Update Status to Done
+
+**Before merge, update status in worktree (so changes are included in merge).**
+
+After ALL pipeline steps complete successfully:
+
+1. **Update sprint-status.yaml**:
+   - Find the story entry
+   - Change status from `in-progress` to `done`
+
+2. **Update story document** (if exists):
+   - Change `Status:` to `done`
+   - Mark all tasks with ✅
+
+**Progress output:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Update Status
+   📝 sprint-status.yaml: ${STORY_ID} → done
+   📄 Story doc: Status: done, Tasks: ✅
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+## Phase 4: Merge or Preserve
 
 **Critical decision step: Check merge conditions**
 
@@ -175,7 +200,7 @@ Merge conditions:
 **If all conditions are met, execute merge yourself:**
 
 ```
-1. Commit all changes in worktree:
+1. Commit all changes in worktree (including status updates):
    cd ${WORKTREE_PATH}
    git add .
    git commit -m "feat: complete story ${STORY_ID}"
@@ -227,48 +252,6 @@ Merge conditions:
 
 ---
 
-## Phase 4: Update Status to Done
-
-**After successful merge, update status files.**
-
-### 4.1 Update sprint-status.yaml
-
-Use Edit tool to update status file:
-
-```
-File path: _bmad-output/implementation-artifacts/sprint-status.yaml (or docs/sprint/sprint-status.yaml)
-
-Change story status from in-progress to done:
-  {epic-num}-{story-num}-{story-name}: done
-```
-
-### 4.2 Update Story Document (if exists)
-
-Use Edit tool to update story document status:
-
-```
-File path: _bmad-output/implementation-artifacts/{epic-num}-{story-num}-{story-name}.md
-
-Update two places:
-
-1. Top status line:
-   Change "Status: in-progress" to "Status: done"
-
-2. Tasks checklist (if any):
-   Change all "- [ ]" to "- [x]" to mark tasks complete
-```
-
-**Progress output:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Update Status
-   📝 sprint-status.yaml: ${STORY_ID} → done
-   📄 Story doc: Status: done, Tasks: ✅
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
----
-
 ## Final Delivery Report
 
 **Successful merge:**
@@ -280,8 +263,8 @@ Update two places:
 ║                                                        ║
 ║  ✅ Phase 1 - Create Worktree                          ║
 ║  ✅ Phase 2 - Configurable Pipeline                    ║
-║  ✅ Phase 3 - Merge Branch                             ║
-║  ✅ Phase 4 - Update Status to Done                    ║
+║  ✅ Phase 3 - Update Status to Done                    ║
+║  ✅ Phase 4 - Merge Branch                             ║
 ║                                                        ║
 ║  📊 Status: done                                       ║
 ╚════════════════════════════════════════════════════════╝
@@ -296,8 +279,8 @@ Update two places:
 ║                                                        ║
 ║  ✅ Phase 1 - Create Worktree                          ║
 ║  ❌ Phase 2 - Pipeline [failed at Step X]              ║
-║  ⏸️ Phase 3 - Merge Branch [not started]               ║
-║  ⏸️ Phase 4 - Update Status [not started]              ║
+║  ⏸️ Phase 3 - Update Status [not started]              ║
+║  ⏸️ Phase 4 - Merge Branch [not started]               ║
 ║                                                        ║
 ║  📁 Worktree: ${WORKTREE_PATH}                         ║
 ║  💡 Fix the issue and continue manually                ║
