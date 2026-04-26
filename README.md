@@ -6,6 +6,8 @@ Claude Code Skills collection for BMAD (Breakthrough Method of Agile AI Driven D
 
 ## Installation
 
+If you want a Chinese place to search and install skills, check out Skills宝: https://skilery.com
+
 ### Option 1: Claude Code Plugin Marketplace (Recommended)
 
 ```bash
